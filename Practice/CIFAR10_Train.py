@@ -19,6 +19,7 @@ def main():
     ]), download=True)
     cifar_test = DataLoader(cifar_test, batch_size=batch_size, shuffle=True)
 
+
     device = torch.device('cuda')
     model = Lenet5().to(device)
     criteon = nn.CrossEntropyLoss().to(device)
