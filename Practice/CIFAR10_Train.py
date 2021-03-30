@@ -20,7 +20,7 @@ def main():
     cifar_test = datasets.CIFAR10('cifar_data', False, transform=transforms.Compose([
         transforms.Resize((32, 32)),
         transforms.ToTensor(),
-        transforms.Normalize(mean=[0.485, 0.456, 0.406],std=[0.229, 0.224, 0.225])
+        # transforms.Normalize(mean=[0.485, 0.456, 0.406],std=[0.229, 0.224, 0.225])
     ]), download=True)
     cifar_test = DataLoader(cifar_test, batch_size=batch_size, shuffle=True)
 
