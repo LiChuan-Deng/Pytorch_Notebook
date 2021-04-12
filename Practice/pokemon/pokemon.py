@@ -2,7 +2,7 @@ import torch
 import os, glob
 import random, csv
 
-from torch.utils.data import Dataset
+from torch.utils.data import Dataset, DataLoader
 from torchvision import transforms
 from PIL import Image
 
@@ -23,7 +23,7 @@ class Pokemon(Dataset):
 
             self.name2label[name] = len(self.name2label.keys())
 
-        print(self.name2label)
+        # print(self.name2label)
 
         # image, label
         self.images, self.labels = self.load_csv('images.csv')
@@ -77,6 +77,18 @@ class Pokemon(Dataset):
     def __len__(self):
         return len(self.images)
 
+    def denormalize(self, x_hat):
+        mean = [0.485, 0.456, 0.406]
+        std = [0.229, 0.224, 0.225]
+
+        # x_hat = (x-mean)/std
+        # x: [c, h, w]
+        # mean: [3] => [3, 1, 1]
+        mean = torch.tensor(mean).unsqueeze(1).unsqueeze(1)
+        std = torch.tensor(std).unsqueeze(1).unsqueeze(1)
+
+        x = x_hat * std + mean
+        return x
 
     def __getitem__(self, idx):
         # idx [0, len(images)]
@@ -85,7 +97,11 @@ class Pokemon(Dataset):
         tf = transforms.Compose([
             lambda x: Image.open(x).convert('RGB'), # string path => image data
             transforms.Resize((self.resize, self.resize)),
+            transforms.RandomRotation(15),
+            transforms.CenterCrop(self.resize),
             transforms.ToTensor(),
+            transforms.Normalize(mean=[0.485, 0.456, 0.406],
+                                 std=[0.229, 0.224, 0.225])
         ])
 
         img = tf(img)
@@ -103,6 +119,7 @@ def main():
     db = Pokemon('D:\Projects\pokeman', 224, 'train')
     x,y = next(iter(db))
     print('sample:', x.shape, y.shape, y)
+    loader = DataLoader(db, batch_size=32, shuffle=True)
 
 if __name__ == '__main__':
     main()
